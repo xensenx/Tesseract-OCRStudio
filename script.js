@@ -440,11 +440,15 @@ async function processBatch(batch, apiKey, batchNum) {
  */
 async function renderPageToBase64(pageNum) {
   const page     = await state.pdfDoc.getPage(pageNum);
-  const scale    = 2.0; // ~150 DPI for A4 — good balance of quality vs payload size
+  const scale    = 1.4; // ~150 DPI for A4 — good balance of quality vs payload size
   const viewport = page.getViewport({ scale });
 
   renderCanvas.width  = viewport.width;
   renderCanvas.height = viewport.height;
+
+ // Improve quality when scaling the PDF render
+  renderCtx.imageSmoothingEnabled = true;
+  renderCtx.imageSmoothingQuality = "high";
 
   renderCtx.clearRect(0, 0, renderCanvas.width, renderCanvas.height);
   renderCtx.fillStyle = '#ffffff';
@@ -453,7 +457,7 @@ async function renderPageToBase64(pageNum) {
   await page.render({ canvasContext: renderCtx, viewport }).promise;
 
   // Strip "data:image/png;base64," prefix — API wants raw base64
-  return renderCanvas.toDataURL('image/png').split(',')[1];
+  return renderCanvas.toDataURL('image/jpeg', 0.85).split(',')[1];
 }
 
 /**
@@ -485,7 +489,7 @@ Rules:
         { text: prompt },
         {
           inline_data: {
-            mime_type: 'image/png',
+            mime_type: 'image/jpeg',
             data: base64Image,
           },
         },
