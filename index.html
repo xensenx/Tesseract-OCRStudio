@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tesseract OCR Studio</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.min.js"></script>
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════════
+       SECTION 1 — PRESENTATION SLIDES
+  ══════════════════════════════════════════════ -->
+  <div id="presentation" class="presentation-wrapper">
+
+    <div class="slide active" data-slide="0">
+      <div class="slide-bg slide-bg--grid"></div>
+      <div class="slide-content title-slide">
+        <div class="title-eyebrow"><span class="dot"></span> AI-Powered Document Intelligence</div>
+        <h1 class="title-main">
+          <span class="title-word">Tesseract</span>
+          <span class="title-word accent">OCR</span>
+          <span class="title-word">Studio</span>
+        </h1>
+        <p class="title-sub">Vision-language transcription. No OCR engine required.</p>
+        <div class="title-cta">Press <kbd>Enter</kbd> or click the arrow to begin</div>
+      </div>
+      <div class="slide-corner-label">01 / 05</div>
+    </div>
+
+    <div class="slide" data-slide="1">
+      <div class="slide-bg slide-bg--dots"></div>
+      <div class="slide-content">
+        <div class="slide-tag">FOUNDATIONS</div>
+        <h2 class="slide-heading">What is <span class="accent">OCR</span>?</h2>
+        <div class="slide-body two-col">
+          <div class="col-text">
+            <p>Optical Character Recognition (OCR) converts images of typed, handwritten, or printed text into machine-readable data.</p>
+            <p>Traditional engines use pixel-level pattern matching — they fail on complex layouts, rotated text, or degraded documents. Vision-language models understand context.</p>
+          </div>
+          <div class="col-visual">
+            <div class="ocr-diagram">
+              <div class="diag-step"><div class="diag-icon">📄</div><div class="diag-label">Document Image</div></div>
+              <div class="diag-arrow">→</div>
+              <div class="diag-step"><div class="diag-icon">🔍</div><div class="diag-label">Character Detection</div></div>
+              <div class="diag-arrow">→</div>
+              <div class="diag-step"><div class="diag-icon">🔤</div><div class="diag-label">Text Output</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-corner-label">02 / 05</div>
+    </div>
+
+    <div class="slide" data-slide="2">
+      <div class="slide-bg slide-bg--lines"></div>
+      <div class="slide-content">
+        <div class="slide-tag">CONTEXT</div>
+        <h2 class="slide-heading">Why transcription <span class="accent">matters</span></h2>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-number">2.5<span>B+</span></div>
+            <div class="stat-desc">Documents digitised globally each year</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">80<span>%</span></div>
+            <div class="stat-desc">Of enterprise data lives in unstructured documents</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">10<span>×</span></div>
+            <div class="stat-desc">Faster processing vs. manual transcription</div>
+          </div>
+        </div>
+        <p class="slide-footnote">Accurate transcription unlocks search, analysis, accessibility, and automation at scale.</p>
+      </div>
+      <div class="slide-corner-label">03 / 05</div>
+    </div>
+
+    <div class="slide" data-slide="3">
+      <div class="slide-bg slide-bg--grid"></div>
+      <div class="slide-content">
+        <div class="slide-tag">ARCHITECTURE</div>
+        <h2 class="slide-heading">How this <span class="accent">platform</span> works</h2>
+        <div class="pipeline">
+          <div class="pipeline-step">
+            <div class="ps-num">01</div>
+            <div class="ps-title">Upload PDF</div>
+            <div class="ps-desc">Drag &amp; drop or browse to select your document</div>
+          </div>
+          <div class="pipeline-connector"></div>
+          <div class="pipeline-step">
+            <div class="ps-num">02</div>
+            <div class="ps-title">Render Pages</div>
+            <div class="ps-desc">pdf.js renders each page to a canvas at 2× scale</div>
+          </div>
+          <div class="pipeline-connector"></div>
+          <div class="pipeline-step">
+            <div class="ps-num">03</div>
+            <div class="ps-title">Dual-Key AI</div>
+            <div class="ps-desc">Two API keys process page batches in parallel simultaneously</div>
+          </div>
+          <div class="pipeline-connector"></div>
+          <div class="pipeline-step">
+            <div class="ps-num">04</div>
+            <div class="ps-title">Export</div>
+            <div class="ps-desc">Download clean TXT or structured PDF</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-corner-label">04 / 05</div>
+    </div>
+
+    <div class="slide" data-slide="4">
+      <div class="slide-bg slide-bg--glow"></div>
+      <div class="slide-content center-content">
+        <div class="slide-tag">READY</div>
+        <h2 class="slide-heading mega">Let's <span class="accent">extract</span><br/>some text.</h2>
+        <p class="slide-sub-p">Upload any PDF — two Gemma 3 27B IT keys process your pages simultaneously. 13 pages in ~4 minutes instead of 52.</p>
+        <button class="launch-btn" id="launchToolBtn">
+          <span>Launch Studio</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+      </div>
+      <div class="slide-corner-label">05 / 05</div>
+    </div>
+
+    <div class="slide-nav">
+      <button class="slide-nav-btn" id="prevBtn" title="Previous">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <div class="slide-dots" id="slideDots"></div>
+      <button class="slide-nav-btn" id="nextBtn" title="Next">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+    </div>
+
+  </div><!-- /presentation -->
+
+
+  <!-- ══════════════════════════════════════════════
+       SECTION 2 — OCR TOOL INTERFACE
+  ══════════════════════════════════════════════ -->
+  <div id="toolInterface" class="tool-interface hidden">
+
+    <header class="tool-header">
+      <div class="tool-logo">
+        <svg class="logo-icon" viewBox="0 0 32 32" fill="none">
+          <rect x="2" y="2" width="12" height="12" rx="1" stroke="currentColor" stroke-width="2"/>
+          <rect x="18" y="2" width="12" height="12" rx="1" stroke="currentColor" stroke-width="2"/>
+          <rect x="2" y="18" width="12" height="12" rx="1" stroke="currentColor" stroke-width="2"/>
+          <rect x="18" y="18" width="12" height="12" rx="1" stroke="currentColor" stroke-width="2"/>
+          <circle cx="16" cy="16" r="3" fill="var(--accent)"/>
+        </svg>
+        <span>Tesseract OCR Studio</span>
+      </div>
+      <div class="tool-header-actions">
+        <button class="btn-ghost" id="backToSlidesBtn">← Back to Intro</button>
+        <div class="api-status" id="apiStatus">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="apiStatusText">Loading keys…</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="tool-main">
+
+      <!-- LEFT PANEL -->
+      <aside class="panel panel-left">
+
+        <!-- Engine status -->
+        <div class="panel-section">
+          <div class="section-label">Engine Status</div>
+          <div class="key-status-card" id="keyStatusCard">
+            <div class="ks-spinner" id="ksSpinner"></div>
+            <div class="ks-text" id="ksText">Fetching API keys from server…</div>
+          </div>
+        </div>
+
+        <!-- Upload -->
+        <div class="panel-section">
+          <div class="section-label">Document</div>
+          <div class="drop-zone" id="dropZone" role="button" tabindex="0" aria-label="Upload PDF">
+            <div class="drop-zone-inner">
+              <svg class="drop-icon" viewBox="0 0 48 48" fill="none">
+                <rect x="8" y="6" width="32" height="36" rx="3" stroke="currentColor" stroke-width="2"/>
+                <line x1="16" y1="16" x2="32" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <line x1="16" y1="22" x2="32" y2="22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <line x1="16" y1="28" x2="24" y2="28" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="34" cy="34" r="8" fill="var(--bg-panel)" stroke="var(--accent)" stroke-width="2"/>
+                <line x1="34" y1="30" x2="34" y2="38" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+                <line x1="30" y1="34" x2="38" y2="34" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <p class="drop-primary">Drop PDF here</p>
+              <p class="drop-secondary">or <span class="drop-link">browse files</span></p>
+              <p class="drop-limit">Max 15 pages · PDF only</p>
+            </div>
+            <input type="file" id="fileInput" accept=".pdf" hidden />
+          </div>
+          <div class="file-info hidden" id="fileInfo">
+            <div class="file-info-icon">📄</div>
+            <div class="file-info-text">
+              <div class="file-name" id="fileName">—</div>
+              <div class="file-meta" id="fileMeta">—</div>
+            </div>
+            <button class="file-remove" id="removeFile" title="Remove">×</button>
+          </div>
+        </div>
+
+        <!-- Batch plan (shown once file is loaded) -->
+        <div class="panel-section hidden" id="batchInfoSection">
+          <div class="section-label">Parallel Batch Plan</div>
+          <div class="batch-info">
+            <div class="batch-row">
+              <div class="batch-key-label">
+                <span class="batch-dot batch-dot--1"></span> Key 1
+              </div>
+              <div class="batch-pages" id="batchKey1Pages">—</div>
+            </div>
+            <div class="batch-row">
+              <div class="batch-key-label">
+                <span class="batch-dot batch-dot--2"></span> Key 2
+              </div>
+              <div class="batch-pages" id="batchKey2Pages">—</div>
+            </div>
+            <div class="batch-note">⚡ Both batches fire simultaneously</div>
+          </div>
+        </div>
+
+        <!-- Process -->
+        <div class="panel-section">
+          <button class="btn-primary" id="processBtn" disabled>
+            <span id="processBtnText">Process Document</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+          </button>
+        </div>
+
+      </aside>
+
+      <!-- RIGHT PANEL -->
+      <section class="panel panel-right">
+
+        <!-- IDLE -->
+        <div class="state-panel" id="stateIdle">
+          <div class="idle-illustration">
+            <div class="idle-grid">
+              <div class="ig-cell" style="--d:0.0s"></div>
+              <div class="ig-cell" style="--d:0.1s"></div>
+              <div class="ig-cell" style="--d:0.2s"></div>
+              <div class="ig-cell" style="--d:0.3s"></div>
+              <div class="ig-cell" style="--d:0.4s"></div>
+              <div class="ig-cell" style="--d:0.5s"></div>
+              <div class="ig-cell" style="--d:0.6s"></div>
+              <div class="ig-cell" style="--d:0.7s"></div>
+              <div class="ig-cell" style="--d:0.8s"></div>
+            </div>
+          </div>
+          <h3 class="idle-title">Ready to Extract</h3>
+          <p class="idle-desc">Upload a PDF to begin. API keys are loaded securely from the server — no manual configuration needed.</p>
+        </div>
+
+        <!-- PROCESSING -->
+        <div class="state-panel hidden" id="stateProcessing">
+          <div class="processing-header">
+            <div class="proc-spinner">
+              <div class="spinner-ring"></div>
+              <div class="spinner-dot"></div>
+            </div>
+            <div class="proc-title-block">
+              <div class="proc-phase" id="procPhase">Preparing document</div>
+              <div class="proc-sub" id="procSub">Initialising…</div>
+            </div>
+          </div>
+
+          <div class="progress-section">
+            <div class="progress-bar-wrap">
+              <div class="progress-bar" id="progressBar" style="width:0%"></div>
+            </div>
+            <div class="progress-label">
+              <span id="progressLabel">0 / 0 pages</span>
+              <span id="progressPct">0%</span>
+            </div>
+          </div>
+
+          <!-- Dual batch live status rows -->
+          <div class="dual-batch-rows" id="dualBatchRows"></div>
+
+          <div class="page-tiles" id="pageTiles"></div>
+        </div>
+
+        <!-- RESULTS -->
+        <div class="state-panel hidden" id="stateResults">
+          <div class="results-header">
+            <div class="results-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <div>
+              <h3 class="results-title">Transcription Complete</h3>
+              <p class="results-meta" id="resultsMeta">—</p>
+            </div>
+          </div>
+
+          <div class="results-actions">
+            <button class="btn-action" id="downloadTxtBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Download TXT
+            </button>
+            <button class="btn-action" id="downloadPdfBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              Download PDF
+            </button>
+            <button class="btn-action" id="viewPreviewBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              View Preview
+            </button>
+            <button class="btn-action btn-action--accent" id="summaryBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              Generate AI Summary
+            </button>
+          </div>
+
+          <div class="preview-section hidden" id="previewSection">
+            <div class="preview-label">Text Preview</div>
+            <div class="preview-scroll" id="previewScroll"></div>
+          </div>
+
+          <div class="summary-section hidden" id="summarySection">
+            <div class="summary-label">
+              AI Summary
+              <div class="summary-spinner hidden" id="summarySpinner"></div>
+            </div>
+            <div class="summary-content" id="summaryContent"></div>
+          </div>
+
+          <div class="results-footer">
+            <button class="btn-ghost" id="resetBtn">↩ Process another document</button>
+          </div>
+        </div>
+
+      </section>
+    </main>
+
+    <!-- On-screen error toast -->
+    <div class="error-log hidden" id="errorLog">
+      <div class="error-log-label">⚠ API Error (see Console for full details)</div>
+      <div class="error-log-msg" id="errorLogMsg"></div>
+    </div>
+
+    <!-- Shared hidden canvas for serialised PDF rendering -->
+    <canvas id="renderCanvas" style="display:none"></canvas>
+
+  </div><!-- /toolInterface -->
+
+  <script src="script.js"></script>
+</body>
+</html>
