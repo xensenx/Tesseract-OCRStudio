@@ -16,7 +16,9 @@
     {
       "src": "*.js",
       "use": "@vercel/static",
-      "config": { "excludeFiles": "api/**" }
+      "config": {
+        "excludeFiles": "api/**"
+      }
     }
   ],
   "routes": [
@@ -28,9 +30,5 @@
       "src": "/(.*)",
       "dest": "/$1"
     }
-  ],
-  "env": {
-    "GEMMA_API_KEY_ONE": "@gemma_api_key_one",
-    "GEMMA_API_KEY_TWO": "@gemma_api_key_two"
-  }
+  ]
 }
