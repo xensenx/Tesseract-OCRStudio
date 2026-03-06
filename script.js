@@ -150,14 +150,31 @@ function buildDots() {
   }
 }
 
+// Transition types varied per slide pair for visual interest
+const TRANSITION_TYPES = ['slide', 'fade', 'slide', 'rise', 'fade'];
+
 function goToSlide(index) {
   if (index < 0) return;
   if (index >= state.totalSlides) { launchTool(); return; }
 
-  slides[state.currentSlide].classList.add('exit');
-  slides[state.currentSlide].classList.remove('active');
-  slides[index].classList.add('active');
-  setTimeout(() => slides[state.currentSlide].classList.remove('exit'), 600);
+  const direction = index > state.currentSlide ? 'forward' : 'backward';
+  const transType = TRANSITION_TYPES[index] || 'slide';
+  const outSlide  = slides[state.currentSlide];
+  const inSlide   = slides[index];
+
+  // Set transition type on wrapper for CSS to pick up
+  presentation.dataset.transition = transType;
+  presentation.dataset.direction  = direction;
+
+  outSlide.classList.add('exit');
+  outSlide.classList.remove('active');
+  inSlide.classList.add('active');
+
+  setTimeout(() => {
+    outSlide.classList.remove('exit');
+    delete presentation.dataset.transition;
+    delete presentation.dataset.direction;
+  }, 650);
 
   state.currentSlide = index;
   document.querySelectorAll('.slide-dot').forEach((d, i) =>
@@ -214,16 +231,16 @@ async function loadApiKeys() {
     state.keyOne = keyOne;
     state.keyTwo = keyTwo;
 
-    setKeyStatus('ready', '2 × Gemma 3 27B IT keys loaded · Dual-batch parallel mode active');
+    setKeyStatus('ready', 'Engine active');
     statusDot.classList.add('active');
-    apiStatusText.textContent = '2 Keys Ready';
+    apiStatusText.textContent = 'Active';
     checkProcessReady();
 
   } catch (err) {
     console.error('[loadApiKeys]', err);
-    setKeyStatus('error', `Key load failed: ${err.message}. Check Vercel env vars GEMMA_API_KEY_ONE and GEMMA_API_KEY_TWO.`);
+    setKeyStatus('error', 'Engine down — invalid API configuration');
     statusDot.classList.add('error');
-    apiStatusText.textContent = 'Key Error';
+    apiStatusText.textContent = 'Down';
   }
 }
 
