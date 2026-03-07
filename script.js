@@ -661,9 +661,12 @@ async function generateSummary() {
     }
 
     const data = await response.json();
-    summaryContent.textContent =
-      (data.candidates?.[0]?.content?.parts ?? []).map(p => p.text || '').join('').trim()
-      || 'No summary generated.';
+    const rawSummary = (data.candidates?.[0]?.content?.parts ?? []).map(p => p.text || '').join('').trim();
+    if (rawSummary) {
+      summaryContent.innerHTML = marked.parse(rawSummary);
+    } else {
+      summaryContent.textContent = 'No summary generated.';
+    }
 
   } catch (err) {
     summaryContent.textContent = `Summary failed: ${err.message}`;
