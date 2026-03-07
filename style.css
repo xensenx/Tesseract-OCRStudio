@@ -63,17 +63,21 @@ body {
   height: 100%;
   object-fit: cover;
   object-position: center;
-  /* Slight desaturate so it doesn't compete with text */
-  filter: saturate(0.6) brightness(0.55);
+  /* Normal appearance — video is already subtle particles */
+  transition: opacity 1.2s ease;
 }
 
-/* Dark gradient overlay — heavier at text regions */
+.video-bg.video-fading {
+  opacity: 0;
+}
+
+/* Dark gradient overlay — lighter since video is already subtle */
 .video-overlay {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 80% 60% at 50% 50%, rgba(8,8,9,0.35) 0%, rgba(8,8,9,0.72) 100%),
-    linear-gradient(180deg, rgba(8,8,9,0.5) 0%, rgba(8,8,9,0.2) 40%, rgba(8,8,9,0.6) 100%);
+    radial-gradient(ellipse 80% 60% at 50% 50%, rgba(8,8,9,0.2) 0%, rgba(8,8,9,0.55) 100%),
+    linear-gradient(180deg, rgba(8,8,9,0.35) 0%, rgba(8,8,9,0.1) 40%, rgba(8,8,9,0.45) 100%);
 }
 
 
@@ -104,56 +108,152 @@ body {
   opacity: 0;
   pointer-events: none;
   z-index: 1;
-  /* Default transition: slide from right */
-  transform: translateX(48px);
+  transform: translateX(60px) scale(0.97);
+  filter: blur(0px);
   transition:
-    opacity 0.6s var(--ease),
-    transform 0.6s var(--ease);
+    opacity 1.4s var(--ease),
+    transform 1.4s var(--ease),
+    filter 1.4s var(--ease);
 }
 
 .slide.active {
   opacity: 1;
   pointer-events: all;
   transform: none;
+  filter: blur(0px);
   z-index: 2;
 }
 
 /* ── EXIT variants — driven by data-transition on the wrapper ── */
 
-/* Default / slide transition */
+/* Default / slide-blur exit */
 .slide.exit {
   opacity: 0;
-  transform: translateX(-48px);
+  transform: translateX(-80px) scale(0.95);
+  filter: blur(6px);
   transition:
-    opacity 0.55s var(--ease),
-    transform 0.55s var(--ease);
+    opacity 1.2s var(--ease),
+    transform 1.2s var(--ease),
+    filter 1.2s var(--ease);
 }
 
-/* Fade transition (slides 2 & 5) */
+/* Fade+scale transition */
 [data-transition="fade"] .slide.exit {
-  transform: none;
+  transform: scale(1.04);
+  filter: blur(4px);
   opacity: 0;
 }
 [data-transition="fade"] .slide.active {
-  transform: none;
+  animation: fadeScaleIn 1.5s var(--ease) both;
+}
+@keyframes fadeScaleIn {
+  from { opacity: 0; transform: scale(0.92); filter: blur(6px); }
+  to   { opacity: 1; transform: none; filter: blur(0px); }
 }
 
-/* Rise transition (slide 4) */
+/* Rise + rotate transition */
 [data-transition="rise"] .slide.exit {
-  transform: translateY(40px);
+  transform: translateY(60px) rotateX(4deg);
+  filter: blur(5px);
   opacity: 0;
 }
 [data-transition="rise"] .slide.active {
-  transform: translateY(0);
+  animation: riseRotateIn 1.5s var(--ease) both;
+}
+@keyframes riseRotateIn {
+  from { opacity: 0; transform: translateY(50px) rotateX(4deg); filter: blur(4px); }
+  to   { opacity: 1; transform: none; filter: blur(0px); }
 }
 
-/* Backward direction — incoming slides come from left */
+/* Zoom transition */
+[data-transition="zoom"] .slide.exit {
+  transform: scale(0.85);
+  filter: blur(8px);
+  opacity: 0;
+}
+[data-transition="zoom"] .slide.active {
+  animation: zoomIn 1.5s var(--ease) both;
+}
+@keyframes zoomIn {
+  from { opacity: 0; transform: scale(1.15); filter: blur(6px); }
+  to   { opacity: 1; transform: none; filter: blur(0px); }
+}
+
+/* Backward direction */
 [data-direction="backward"] .slide.active {
-  animation: slideFromLeft 0.6s var(--ease) both;
+  animation: slideFromLeft 1.4s var(--ease) both;
+}
+[data-direction="backward"] .slide.exit {
+  transform: translateX(80px) scale(0.95);
+  filter: blur(6px);
 }
 @keyframes slideFromLeft {
-  from { opacity: 0; transform: translateX(-48px); }
-  to   { opacity: 1; transform: none; }
+  from { opacity: 0; transform: translateX(-60px) scale(0.97); filter: blur(4px); }
+  to   { opacity: 1; transform: none; filter: blur(0px); }
+}
+
+/* ── Staggered element entry on active slides ── */
+.slide.entering .slide-tag,
+.slide.entering .slide-heading,
+.slide.entering .slide-body,
+.slide.entering .slide-sub-p,
+.slide.entering .title-eyebrow,
+.slide.entering .title-main,
+.slide.entering .title-sub,
+.slide.entering .title-cta,
+.slide.entering .slide-footnote,
+.slide.entering .launch-btn {
+  opacity: 0;
+  transform: translateY(25px);
+  animation: staggerFadeUp 0.8s var(--ease) both;
+}
+.slide.entering .slide-tag,
+.slide.entering .title-eyebrow      { animation-delay: 0.15s; }
+.slide.entering .slide-heading,
+.slide.entering .title-main          { animation-delay: 0.35s; }
+.slide.entering .slide-body,
+.slide.entering .title-sub            { animation-delay: 0.55s; }
+.slide.entering .slide-footnote,
+.slide.entering .title-cta,
+.slide.entering .slide-sub-p          { animation-delay: 0.7s; }
+.slide.entering .launch-btn           { animation-delay: 0.85s; }
+
+@keyframes staggerFadeUp {
+  from { opacity: 0; transform: translateY(25px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Staggered pop for cards ── */
+.slide.entering .stat-card,
+.slide.entering .pipeline-step,
+.slide.entering .diag-step {
+  opacity: 0;
+  transform: translateY(30px) scale(0.9);
+  animation: cardPop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.slide.entering .stat-card:nth-child(1),
+.slide.entering .pipeline-step:nth-child(1),
+.slide.entering .diag-step:nth-child(1) { animation-delay: 0.6s; }
+.slide.entering .stat-card:nth-child(2),
+.slide.entering .pipeline-step:nth-child(3) { animation-delay: 0.75s; }
+.slide.entering .stat-card:nth-child(3),
+.slide.entering .pipeline-step:nth-child(5) { animation-delay: 0.9s; }
+.slide.entering .pipeline-step:nth-child(7) { animation-delay: 1.05s; }
+.slide.entering .diag-step:nth-child(3) { animation-delay: 0.75s; }
+.slide.entering .diag-step:nth-child(5) { animation-delay: 0.9s; }
+
+/* Connectors and arrows fade in */
+.slide.entering .pipeline-connector,
+.slide.entering .diag-arrow {
+  opacity: 0;
+  animation: staggerFadeUp 0.5s var(--ease) both;
+  animation-delay: 0.7s;
+}
+
+@keyframes cardPop {
+  from { opacity: 0; transform: translateY(30px) scale(0.9); }
+  70%  { transform: translateY(-4px) scale(1.03); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 
@@ -275,7 +375,7 @@ body {
   align-items: center;
 }
 .col-text p {
-  color: rgba(255,255,255,0.45);
+  color: rgba(255,255,255,0.6);
   font-size: 0.93rem;
   line-height: 1.75;
   margin-bottom: 0.9rem;
@@ -298,7 +398,8 @@ body {
   gap: 0.4rem;
   flex: 1;
 }
-.diag-icon { font-size: 1.6rem; }
+.diag-icon { width: 32px; height: 32px; color: var(--accent); }
+.diag-icon svg { width: 100%; height: 100%; }
 .diag-label {
   font-family: var(--font-mono);
   font-size: 0.6rem;
@@ -342,7 +443,7 @@ body {
   letter-spacing: -0.02em;
 }
 .stat-unit { font-size: 1.8rem; font-weight: 700; }
-.stat-desc { font-size: 0.8rem; color: rgba(255,255,255,0.35); line-height: 1.5; }
+.stat-desc { font-size: 0.8rem; color: rgba(255,255,255,0.5); line-height: 1.5; }
 .slide-footnote {
   font-size: 0.82rem;
   color: rgba(255,255,255,0.28);
@@ -393,7 +494,7 @@ body {
   margin-bottom: 0.35rem;
   color: #fff;
 }
-.ps-desc { font-size: 0.78rem; color: rgba(255,255,255,0.35); line-height: 1.5; }
+.ps-desc { font-size: 0.78rem; color: rgba(255,255,255,0.5); line-height: 1.5; }
 
 /* ─── Slide 5 — Launch ────────────────────────────────────── */
 .center-content {
@@ -408,7 +509,7 @@ body {
 }
 .slide-sub-p {
   font-size: 0.9rem;
-  color: rgba(255,255,255,0.38);
+  color: rgba(255,255,255,0.55);
   line-height: 1.75;
   margin-bottom: 2.5rem;
   font-weight: 300;
@@ -729,73 +830,159 @@ body {
 .idle-title { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; margin-bottom: 0.4rem; }
 .idle-desc { color: var(--text-muted); font-size: 0.85rem; max-width: 280px; }
 
-/* ─── Processing ──────────────────────────────────────────── */
-.processing-header {
-  display: flex; align-items: center; gap: 1rem;
-  padding-bottom: 1.4rem; border-bottom: 1px solid var(--border);
+/* ─── Processing — Dominant Center Animation ─────────────── */
+#stateProcessing {
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
 }
-.proc-spinner { position: relative; width: 44px; height: 44px; flex-shrink: 0; }
-.spinner-ring {
-  position: absolute; inset: 0;
-  border: 1.5px solid var(--border-mid); border-top-color: var(--accent);
-  border-radius: 50%; animation: spin 1s linear infinite;
+
+.proc-visual {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin: 0 auto 2rem;
 }
-.spinner-dot {
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
-  width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
-  animation: pulseDot 1s ease-in-out infinite;
+
+/* Outer rotating ring */
+.proc-ring {
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-right-color: var(--accent2);
+  border-radius: 50%;
+  animation: procSpin 3s linear infinite;
 }
+.proc-ring-inner {
+  position: absolute;
+  inset: 20px;
+  border: 1.5px dashed var(--border-mid);
+  border-top-color: var(--accent2);
+  border-radius: 50%;
+  animation: procSpin 5s linear infinite reverse;
+}
+.proc-ring-core {
+  position: absolute;
+  inset: 45px;
+  border: 1px solid var(--border);
+  border-bottom-color: var(--accent);
+  border-radius: 50%;
+  animation: procSpin 2s linear infinite;
+}
+
+@keyframes procSpin { to { transform: rotate(360deg); } }
 @keyframes spin { to { transform: rotate(360deg); } }
-@keyframes pulseDot { 0%,100%{opacity:1;transform:translate(-50%,-50%) scale(1)} 50%{opacity:0.4;transform:translate(-50%,-50%) scale(0.6)} }
 
-.proc-phase { font-family: var(--font-display); font-weight: 700; font-size: 1rem; margin-bottom: 0.2rem; }
-.proc-sub { font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-muted); }
+/* Orbiting particles */
+.proc-particle {
+  position: absolute;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  top: 50%; left: 50%;
+}
+.proc-particle:nth-child(1) {
+  background: var(--accent);
+  animation: orbit1 2.5s linear infinite;
+  box-shadow: 0 0 12px var(--accent);
+}
+.proc-particle:nth-child(2) {
+  background: var(--accent2);
+  animation: orbit2 3.2s linear infinite;
+  box-shadow: 0 0 12px var(--accent2);
+  width: 6px; height: 6px;
+}
+.proc-particle:nth-child(3) {
+  background: var(--accent);
+  animation: orbit3 4s linear infinite;
+  box-shadow: 0 0 10px var(--accent);
+  width: 5px; height: 5px;
+  opacity: 0.7;
+}
 
-.progress-bar-wrap { height: 3px; background: var(--bg-card); border-radius: 999px; overflow: hidden; margin-bottom: 0.45rem; }
-.progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 999px; transition: width 0.4s var(--ease); }
-.progress-label { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); }
+@keyframes orbit1 {
+  0%   { transform: translate(-50%,-50%) rotate(0deg)   translateX(80px) scale(1); }
+  50%  { transform: translate(-50%,-50%) rotate(180deg) translateX(80px) scale(1.4); }
+  100% { transform: translate(-50%,-50%) rotate(360deg) translateX(80px) scale(1); }
+}
+@keyframes orbit2 {
+  0%   { transform: translate(-50%,-50%) rotate(120deg)  translateX(60px) scale(1); }
+  50%  { transform: translate(-50%,-50%) rotate(300deg)  translateX(60px) scale(1.3); }
+  100% { transform: translate(-50%,-50%) rotate(480deg)  translateX(60px) scale(1); }
+}
+@keyframes orbit3 {
+  0%   { transform: translate(-50%,-50%) rotate(240deg)  translateX(100px) scale(1); }
+  50%  { transform: translate(-50%,-50%) rotate(420deg)  translateX(100px) scale(0.6); }
+  100% { transform: translate(-50%,-50%) rotate(600deg)  translateX(100px) scale(1); }
+}
 
-/* ─── Dual Batch Live Rows ────────────────────────────────── */
-.dual-batch-rows { display: flex; flex-direction: column; gap: 0.5rem; }
-.batch-live-row {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 0.65rem 0.9rem;
-  display: flex; align-items: center; gap: 0.9rem;
+/* Center glow */
+.proc-center-glow {
+  position: absolute;
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+  animation: glowPulse 2s ease-in-out infinite;
 }
-.blr-label { font-family: var(--font-mono); font-size: 0.65rem; font-weight: 700; white-space: nowrap; min-width: 70px; }
-.blr-count { font-weight: 400; color: var(--text-dim); margin-left: 0.35rem; }
-.blr-pages { display: flex; flex-wrap: wrap; gap: 3px; }
-.blr-page {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 22px; height: 22px; border-radius: 3px;
-  background: var(--bg); border: 1px solid var(--border-mid);
-  font-family: var(--font-mono); font-size: 0.55rem; color: var(--text-dim);
-  transition: var(--t);
+@keyframes glowPulse {
+  0%,100% { opacity: 0.6; transform: translate(-50%,-50%) scale(1); }
+  50%     { opacity: 1; transform: translate(-50%,-50%) scale(1.5); }
 }
-.blr-page--active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
-.blr-page--done   { border-color: var(--accent2); color: var(--accent2); background: var(--accent2-dim); }
-.blr-page--error  { border-color: var(--red); color: var(--red); }
 
-/* ─── Page Tiles ──────────────────────────────────────────── */
-.page-tiles {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(62px,1fr));
-  gap: 0.5rem; overflow-y: auto;
+/* Phase text under animation */
+.proc-phase-text {
+  text-align: center;
+  margin-bottom: 2rem;
 }
-.page-tile {
-  aspect-ratio: 3/4; background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius); display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 0.3rem;
-  font-family: var(--font-mono); font-size: 0.55rem; color: var(--text-dim);
-  transition: var(--t);
+.proc-phase {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.3rem;
+  margin-bottom: 0.4rem;
+  color: var(--text);
 }
-.page-tile.rendering  { border-color: var(--border-mid); color: var(--text-muted); }
-.page-tile.processing { border-color: var(--accent); color: var(--accent); animation: tileActive 1.2s ease-in-out infinite alternate; }
-.page-tile.done       { border-color: var(--accent2); background: var(--accent2-dim); color: var(--accent2); }
-.page-tile.error      { border-color: var(--red); color: var(--red); }
-@keyframes tileActive { from { box-shadow: none; } to { box-shadow: 0 0 8px rgba(200,240,74,0.15); } }
-.tile-num { font-size: 0.7rem; font-weight: 700; }
-.tile-status { font-size: 0.5rem; letter-spacing: 0.06em; }
+.proc-sub {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+/* Progress bar — prominent */
+.progress-section {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+.progress-bar-wrap {
+  height: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 0.65rem;
+}
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 999px;
+  transition: width 0.5s var(--ease);
+  box-shadow: 0 0 12px rgba(200,240,74,0.3);
+}
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+.progress-pct {
+  color: var(--accent);
+  font-weight: 700;
+}
 
 /* ─── Results ─────────────────────────────────────────────── */
 .results-header {
@@ -834,7 +1021,7 @@ body {
 .preview-scroll {
   max-height: 300px; overflow-y: auto; padding: 1.1rem;
   font-family: var(--font-mono); font-size: 0.74rem;
-  line-height: 1.8; color: var(--text-muted); white-space: pre-wrap; background: var(--bg);
+  line-height: 1.8; color: #d0d0e0; white-space: pre-wrap; background: #060608;
 }
 
 /* Summary */
@@ -854,7 +1041,12 @@ body {
   border: 1.5px solid rgba(200,240,74,0.2); border-top-color: var(--accent);
   border-radius: 50%; animation: spin 0.8s linear infinite;
 }
-.summary-content { padding: 1.1rem; font-size: 0.85rem; line-height: 1.75; color: var(--text); white-space: pre-wrap; }
+.summary-content {
+  padding: 1.1rem; font-size: 0.85rem; line-height: 1.75;
+  color: #e0e0f0; white-space: pre-wrap;
+  background: rgba(10,10,14,0.6);
+  max-height: 300px; overflow-y: auto;
+}
 .results-footer { padding-top: 0.4rem; border-top: 1px solid var(--border); }
 
 /* ─── Error Toast ─────────────────────────────────────────── */
