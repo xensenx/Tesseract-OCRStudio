@@ -68,17 +68,35 @@
           <div class="col-visual">
             <div class="ocr-diagram">
               <div class="diag-step">
-                <div class="diag-icon">📄</div>
+                <div class="diag-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="8" y1="13" x2="16" y2="13"/>
+                    <line x1="8" y1="17" x2="13" y2="17"/>
+                  </svg>
+                </div>
                 <div class="diag-label">Image</div>
               </div>
               <div class="diag-arrow">→</div>
               <div class="diag-step">
-                <div class="diag-icon">🔍</div>
+                <div class="diag-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  </svg>
+                </div>
                 <div class="diag-label">Detect</div>
               </div>
               <div class="diag-arrow">→</div>
               <div class="diag-step">
-                <div class="diag-icon">🔤</div>
+                <div class="diag-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <line x1="4" y1="7" x2="20" y2="7"/>
+                    <line x1="4" y1="12" x2="20" y2="12"/>
+                    <line x1="4" y1="17" x2="14" y2="17"/>
+                  </svg>
+                </div>
                 <div class="diag-label">Output</div>
               </div>
             </div>
@@ -307,29 +325,35 @@
 
         <!-- PROCESSING -->
         <div class="state-panel hidden" id="stateProcessing">
-          <div class="processing-header">
-            <div class="proc-spinner">
-              <div class="spinner-ring"></div>
-              <div class="spinner-dot"></div>
-            </div>
-            <div class="proc-title-block">
-              <div class="proc-phase" id="procPhase">Preparing document</div>
-              <div class="proc-sub" id="procSub">Initialising…</div>
-            </div>
+
+          <!-- Dominant center animation -->
+          <div class="proc-visual">
+            <div class="proc-ring"></div>
+            <div class="proc-ring-inner"></div>
+            <div class="proc-ring-core"></div>
+            <div class="proc-particle"></div>
+            <div class="proc-particle"></div>
+            <div class="proc-particle"></div>
+            <div class="proc-center-glow"></div>
           </div>
 
+          <!-- Phase text -->
+          <div class="proc-phase-text">
+            <div class="proc-phase" id="procPhase">Preparing document</div>
+            <div class="proc-sub" id="procSub">Initialising…</div>
+          </div>
+
+          <!-- Progress bar -->
           <div class="progress-section">
             <div class="progress-bar-wrap">
               <div class="progress-bar" id="progressBar" style="width:0%"></div>
             </div>
             <div class="progress-label">
               <span id="progressLabel">0 / 0 pages</span>
-              <span id="progressPct">0%</span>
+              <span class="progress-pct" id="progressPct">0%</span>
             </div>
           </div>
 
-          <div class="dual-batch-rows" id="dualBatchRows"></div>
-          <div class="page-tiles" id="pageTiles"></div>
         </div>
 
         <!-- RESULTS -->

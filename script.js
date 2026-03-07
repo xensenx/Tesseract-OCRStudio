@@ -110,8 +110,6 @@ const procSub        = $('procSub');
 const progressBar    = $('progressBar');
 const progressLabel  = $('progressLabel');
 const progressPct    = $('progressPct');
-const dualBatchRows  = $('dualBatchRows');
-const pageTiles      = $('pageTiles');
 
 // Results
 const resultsMeta    = $('resultsMeta');
@@ -151,7 +149,7 @@ function buildDots() {
 }
 
 // Transition types varied per slide pair for visual interest
-const TRANSITION_TYPES = ['slide', 'fade', 'slide', 'rise', 'fade'];
+const TRANSITION_TYPES = ['slide', 'fade', 'zoom', 'rise', 'fade'];
 
 function goToSlide(index) {
   if (index < 0) return;
@@ -168,13 +166,16 @@ function goToSlide(index) {
 
   outSlide.classList.add('exit');
   outSlide.classList.remove('active');
+  outSlide.classList.remove('entering');
   inSlide.classList.add('active');
+  inSlide.classList.add('entering');
 
   setTimeout(() => {
     outSlide.classList.remove('exit');
+    inSlide.classList.remove('entering');
     delete presentation.dataset.transition;
     delete presentation.dataset.direction;
-  }, 650);
+  }, 2000);
 
   state.currentSlide = index;
   document.querySelectorAll('.slide-dot').forEach((d, i) =>
@@ -385,10 +386,8 @@ async function startProcessing() {
       .slice(splitIdx)
       .map((img, i) => ({ pageNum: splitIdx + i + 1, base64: img }));
 
-    // ── STEP 3: Show dual-batch live status rows ──────────────────
-    buildDualBatchRows(batch1, batch2);
-
-    setPhase('Extracting text with AI', `${batch1.length} pages → Key 1 · ${batch2.length} pages → Key 2 · firing simultaneously…`);
+    // ── STEP 3: Update UI for extraction phase ─────────────────
+    setPhase('Extracting text with AI', `${batch1.length} pages → Key 1 · ${batch2.length} pages → Key 2`);
 
     // ── STEP 4: Fire both batches in parallel ─────────────────────
     // Within each batch, all pages also fire simultaneously.
@@ -690,8 +689,6 @@ function resetUI() {
   errorLogMsg.textContent = '';
   processBtn.disabled  = true;
   processBtnText.textContent = 'Process Document';
-  pageTiles.innerHTML  = '';
-  dualBatchRows.innerHTML = '';
   showState('idle');
 }
 
@@ -731,54 +728,20 @@ function updateProgress(done, total) {
   progressPct.textContent   = pct + '%';
 }
 
-/** Build live status rows for the two batches */
-function buildDualBatchRows(batch1, batch2) {
-  dualBatchRows.innerHTML = '';
-
-  [
-    { num: 1, batch: batch1, color: 'var(--accent)' },
-    { num: 2, batch: batch2, color: 'var(--accent2)' },
-  ].forEach(({ num, batch, color }) => {
-    const row = document.createElement('div');
-    row.className = 'batch-live-row';
-    row.innerHTML = `
-      <div class="blr-label" style="color:${color}">
-        Key ${num} <span class="blr-count">${batch.length} pages</span>
-      </div>
-      <div class="blr-pages">
-        ${batch.map(b => `<span class="blr-page" id="blr-${b.pageNum}">${b.pageNum}</span>`).join('')}
-      </div>
-    `;
-    dualBatchRows.appendChild(row);
-  });
-}
-
-/** Build per-page tiles */
+/** Build per-page tiles (no-op — old tile UI removed) */
 function buildPageTiles(total) {
-  pageTiles.innerHTML = '';
-  for (let i = 1; i <= total; i++) {
-    const tile = document.createElement('div');
-    tile.className = 'page-tile';
-    tile.id = `tile-${i}`;
-    tile.innerHTML = `<div class="tile-num">${i}</div><div class="tile-status">QUEUED</div>`;
-    pageTiles.appendChild(tile);
-  }
+  // Kept as no-op for pipeline compatibility
 }
 
 function setTileState(pageNum, status) {
-  const tile = $(`tile-${pageNum}`);
-  if (!tile) return;
+  // Update phase sub-text to show activity
   const labels = { rendering: 'RENDER', processing: 'READING', done: '✓ DONE', error: '✗ ERR' };
-  tile.className = `page-tile ${status}`;
-  tile.querySelector('.tile-status').textContent = labels[status] || status.toUpperCase();
-
-  // Also update the batch live-row pip if it exists
-  const pip = $(`blr-${pageNum}`);
-  if (pip) {
-    pip.classList.remove('blr-page--done', 'blr-page--error', 'blr-page--active');
-    if (status === 'done')      pip.classList.add('blr-page--done');
-    else if (status === 'error') pip.classList.add('blr-page--error');
-    else                        pip.classList.add('blr-page--active');
+  if (status === 'rendering') {
+    setProcSub(`Rendering page ${pageNum}…`);
+  } else if (status === 'done') {
+    setProcSub(`Page ${pageNum} complete`);
+  } else if (status === 'error') {
+    setProcSub(`Page ${pageNum} failed`);
   }
 }
 
@@ -809,8 +772,29 @@ function delay(ms) {
   buildDots();
   showState('idle');
 
+  // Apply entering class to initial slide for staggered animations
+  slides[0].classList.add('entering');
+  setTimeout(() => slides[0].classList.remove('entering'), 2000);
+
   // Load API keys from server immediately on page load
   loadApiKeys();
+
+  // ── Video fade at loop boundary ──
+  const bgVideo = $('bgVideo');
+  if (bgVideo) {
+    bgVideo.addEventListener('timeupdate', () => {
+      if (bgVideo.duration && bgVideo.currentTime > bgVideo.duration - 1.5) {
+        bgVideo.classList.add('video-fading');
+      }
+    });
+    bgVideo.addEventListener('seeked', () => {
+      // After loop restarts (seek to 0), remove fade
+      if (bgVideo.currentTime < 1) {
+        // Small delay so the fade-in transition is visible
+        setTimeout(() => bgVideo.classList.remove('video-fading'), 50);
+      }
+    });
+  }
 
   console.log('%cTesseract OCR Studio', 'color:#e8f04a;font-weight:bold;font-size:16px');
   console.log('Mode: Dual-key parallel · Key 1 → batch A · Key 2 → batch B · Promise.all');
