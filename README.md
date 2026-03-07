@@ -60,5 +60,3 @@ To run this project locally, you will need to set up the environment variables f
 ## ℹ️ About
 
 This project demonstrates the power of utilizing Vision-Language Models for document transcription and understanding, bypassing the limitations of traditional OCR software. Built with performance in mind, it utilizes parallel processing and local rendering to deliver fast and accurate results.
-
-**Live Site:** [https://tesseract-ocr-studio-key12.vercel.app/](https://tesseract-ocr-studio-key12.vercel.app/)
