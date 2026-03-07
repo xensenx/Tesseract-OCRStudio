@@ -2,7 +2,7 @@
 
 **Vision-language transcription. No OCR engine required.**
 
-[Visit Tesseract OCR Studio](https://tesseract-ocr-studio-key12.vercel.app/)
+[Visit Tesseract OCR Studio](https://tesseract-ocr-studio.vercel.app/)
 
 Tesseract OCR Studio is an AI-powered document intelligence tool that transforms the way we interact with physical and digital documents. Instead of relying on traditional Optical Character Recognition (OCR) engines that match pixel patterns, Tesseract leverages advanced Vision-Language Models (VLMs) to contextually understand and transcribe documents.
 
