@@ -175,7 +175,7 @@ function goToSlide(index) {
     inSlide.classList.remove('entering');
     delete presentation.dataset.transition;
     delete presentation.dataset.direction;
-  }, 2000);
+  }, 1500);
 
   state.currentSlide = index;
   document.querySelectorAll('.slide-dot').forEach((d, i) =>
@@ -356,6 +356,7 @@ async function startProcessing() {
 
   buildPageTiles(totalPages);
   updateProgress(0, totalPages);
+  startFakeProgress(totalPages);
   setPhase('Preparing document', 'Loading pages…');
 
   try {
@@ -409,6 +410,7 @@ async function startProcessing() {
 
   } catch (err) {
     console.error('Processing error:', err);
+    stopFakeProgress(true);  // stop on error too
     setPhase('Error', err.message);
     showError(`Fatal: ${err.message}`);
     processBtn.disabled = false;
@@ -565,6 +567,7 @@ function mergeAndClean(pages) {
 ══════════════════════════════════════════════════════════════ */
 
 function showResults(totalPages) {
+  stopFakeProgress();  // snap to 100% and stop
   showState('results');
   resultsMeta.textContent =
     `${totalPages} page${totalPages !== 1 ? 's' : ''} processed · ${state.mergedText.length.toLocaleString()} characters`;
@@ -674,6 +677,7 @@ async function generateSummary() {
 resetBtn.addEventListener('click', resetUI);
 
 function resetUI() {
+  stopFakeProgress(true);
   state.extractedPages = [];
   state.mergedText     = '';
   state.pdfDoc         = null;
@@ -715,17 +719,79 @@ function setProcSub(sub) {
   procSub.textContent = sub;
 }
 
-/** Atomically increment done counter and update bar */
+/** Atomically increment done counter (internal tracking only — bar is fake) */
 function incrementProgress() {
   state.doneCount++;
-  updateProgress(state.doneCount, state.totalPages);
+  // Don't touch the visual bar — the fake progress handles it
+}
+
+/** Update visual progress bar directly (used by fake progress system) */
+function updateProgressVisual(pct, done, total) {
+  progressBar.style.width  = pct + '%';
+  progressLabel.textContent = `${done} / ${total} page${total !== 1 ? 's' : ''}`;
+  progressPct.textContent   = Math.round(pct) + '%';
 }
 
 function updateProgress(done, total) {
-  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-  progressBar.style.width  = pct + '%';
-  progressLabel.textContent = `${done} / ${total} page${total !== 1 ? 's' : ''}`;
-  progressPct.textContent   = pct + '%';
+  // Initial call only — sets labels at 0%
+  if (done === 0) {
+    updateProgressVisual(0, 0, total);
+  }
+}
+
+/* ── Fake smooth progress bar ─────────────────────────────── */
+let fakeProgressInterval = null;
+let fakeProgressValue = 0;
+
+/**
+ * Start a fake progress bar that smoothly fills to ~90% over estimated time.
+ * Estimated time: ~20 seconds per page (conservative for AI processing).
+ * The bar accelerates early (rendering is fast) then slows down during AI extraction.
+ */
+function startFakeProgress(totalPages) {
+  fakeProgressValue = 0;
+  const estimatedMs = totalPages * 20000; // ~20s per page
+  const targetPct = 90;                   // max fake reaches before real finish
+  const intervalMs = 200;                 // update every 200ms
+  const totalSteps = estimatedMs / intervalMs;
+
+  let step = 0;
+
+  fakeProgressInterval = setInterval(() => {
+    step++;
+    // Ease-out curve: fast start, slowing down as it approaches target
+    const progress = step / totalSteps;
+    // Eased value: starts fast, decelerates
+    const eased = 1 - Math.pow(1 - Math.min(progress, 1), 2.5);
+    fakeProgressValue = eased * targetPct;
+
+    // Update the visual bar
+    const displayDone = Math.min(
+      Math.round((fakeProgressValue / 100) * totalPages),
+      totalPages - 1
+    );
+    updateProgressVisual(fakeProgressValue, displayDone, totalPages);
+
+    // If we've exceeded estimated time, just hover near 90%
+    if (fakeProgressValue >= targetPct) {
+      clearInterval(fakeProgressInterval);
+      fakeProgressInterval = null;
+    }
+  }, intervalMs);
+}
+
+/**
+ * Stop fake progress and snap to 100% (or just stop on error).
+ */
+function stopFakeProgress(isError) {
+  if (fakeProgressInterval) {
+    clearInterval(fakeProgressInterval);
+    fakeProgressInterval = null;
+  }
+  if (!isError) {
+    fakeProgressValue = 100;
+    updateProgressVisual(100, state.totalPages, state.totalPages);
+  }
 }
 
 /** Build per-page tiles (no-op — old tile UI removed) */
@@ -774,7 +840,7 @@ function delay(ms) {
 
   // Apply entering class to initial slide for staggered animations
   slides[0].classList.add('entering');
-  setTimeout(() => slides[0].classList.remove('entering'), 2000);
+  setTimeout(() => slides[0].classList.remove('entering'), 1500);
 
   // Load API keys from server immediately on page load
   loadApiKeys();
