@@ -7,9 +7,10 @@
  * Environment variables to set in Vercel dashboard:
  *   GEMMA_API_KEY_ONE   — First Google API key
  *   GEMMA_API_KEY_TWO   — Second Google API key
+ *   MAINTENANCE_MODE    — "true" or "false"
  *
  * Endpoint: GET /api/config
- * Returns:  { keyOne: "AIza...", keyTwo: "AIza..." }
+ * Returns:  { keyOne: "AIza...", keyTwo: "AIza...", maintenanceMode: false }
  */
 
 export default function handler(req, res) {
@@ -20,6 +21,7 @@ export default function handler(req, res) {
 
   const keyOne = process.env.GEMMA_API_KEY_ONE || '';
   const keyTwo = process.env.GEMMA_API_KEY_TWO || '';
+  const maintenanceMode = process.env.MAINTENANCE_MODE === 'true';
 
   if (!keyOne || !keyTwo) {
     return res.status(500).json({
@@ -29,5 +31,5 @@ export default function handler(req, res) {
 
   // Return keys — this endpoint is only reachable server-side on Vercel,
   // never exposed in static source files.
-  res.status(200).json({ keyOne, keyTwo });
+  res.status(200).json({ keyOne, keyTwo, maintenanceMode });
 }
