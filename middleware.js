@@ -1,41 +1,15 @@
 /**
- * Vercel Edge Middleware (Standard Web APIs)
- * Runs at the edge before any request is processed.
+ * middleware.js — NOT USED
  *
- * Environment variable:
- *   MAINTENANCE_MODE  — set to "true", "1", "yes", or "on" to enable
+ * Vercel Edge Middleware only executes for framework-based projects (Next.js, etc.)
+ * This is a plain static site, so this file is never invoked by Vercel.
  *
- * When enabled, ALL requests are redirected to /maintenance.html
- * except for /maintenance.html itself (to avoid an infinite redirect loop).
- * The maintenance page is fully self-contained (inline CSS, no external assets)
- * so nothing else needs to be allowed through.
+ * Maintenance mode is handled by:
+ *   1. api/gate.js     — serverless function that checks MAINTENANCE_MODE env var
+ *                        and redirects to /maintenance.html or /index.html
+ *   2. vercel.json     — routes / and /index.html through api/gate.js
+ *   3. api/config.js   — also checks MAINTENANCE_MODE and returns it to the client
+ *                        as a secondary safety net in script.js
+ *
+ * To enable maintenance mode: set MAINTENANCE_MODE=true in Vercel environment variables.
  */
-
-export default function middleware(request) {
-  const isMaintenanceModeEnabled = isTruthy(process.env.MAINTENANCE_MODE);
-
-  if (isMaintenanceModeEnabled) {
-    const { pathname } = new URL(request.url);
-
-    // Only allow the maintenance page itself through — it is fully self-contained.
-    // Block everything else: /, /index.html, /script.js, /api/config, etc.
-    if (pathname === '/maintenance.html') {
-      return; // serve it normally
-    }
-
-    // 307 Temporary Redirect — preserves method, signals "come back later"
-    return Response.redirect(new URL('/maintenance.html', request.url), 307);
-  }
-
-  // Maintenance mode off — proceed normally
-  return;
-}
-
-function isTruthy(value) {
-  if (typeof value !== 'string') return false;
-  return ['1', 'true', 'yes', 'on'].includes(value.trim().toLowerCase());
-}
-
-export const config = {
-  matcher: '/:path*',
-};
