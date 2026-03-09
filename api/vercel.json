@@ -21,6 +21,10 @@
   ],
   "routes": [
     {
+      "src": "/api/maintenance",
+      "dest": "/api/maintenance.js"
+    },
+    {
       "src": "/api/config",
       "dest": "/api/config.js"
     },
