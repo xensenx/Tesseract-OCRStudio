@@ -23,9 +23,6 @@ export default function middleware(request) {
 }
 
 export const config = {
-  // Match all request paths except for Next.js internals and API routes
-  // (which we still want to be able to reach locally if needed, though here we want to block the whole UI)
-  matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  ],
+  // Match all request paths to ensure direct URLs like /index.html are intercepted
+  matcher: '/:path*',
 };
