@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/api/config", "destination": "/api/config.js" },
+    { "source": "/",           "destination": "/api/gate.js"   },
+    { "source": "/index.html", "destination": "/api/gate.js"   }
+  ],
+  "env": {
+    "GEMMA_API_KEY_ONE": "@gemma_api_key_one",
+    "GEMMA_API_KEY_TWO": "@gemma_api_key_two"
+  }
+}
