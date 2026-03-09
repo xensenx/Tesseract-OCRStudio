@@ -36,7 +36,13 @@ export default async function middleware(request) {
 
   if (isMaintenanceModeEnabled) {
     const redirectUrl = new URL('/maintenance.html', request.url);
-    return Response.redirect(redirectUrl, 307);
+    return new Response(null, {
+      status: 307,
+      headers: {
+        Location: redirectUrl.toString(),
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+      },
+    });
   }
 
   return;
