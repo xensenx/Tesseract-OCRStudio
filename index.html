@@ -10,7 +10,10 @@
   <script>
     (async function() {
       try {
-        const res = await fetch('/api/config');
+        // Cache-bust with timestamp so browser never serves a stale 304
+        const res = await fetch('/api/config?_=' + Date.now(), {
+          cache: 'no-store'
+        });
         const data = await res.json();
         if (data.maintenanceMode === true) {
           window.location.replace('/maintenance.html');
