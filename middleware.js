@@ -5,7 +5,6 @@
 
 export default async function middleware(request) {
   const url = new URL(request.url);
-  const envMaintenanceFallback = isTruthy(process.env.MAINTENANCE_MODE);
 
   // Always allow maintenance assets and maintenance status endpoint itself.
   if (
@@ -15,18 +14,6 @@ export default async function middleware(request) {
     url.pathname.startsWith('/_vercel')
   ) {
     return;
-  }
-
-  // Immediate lock if env is available in this runtime and enabled.
-  if (envMaintenanceFallback) {
-    const redirectUrl = new URL('/maintenance.html', request.url);
-    return new Response(null, {
-      status: 307,
-      headers: {
-        Location: redirectUrl.toString(),
-        'Cache-Control': 'no-store, no-cache, must-revalidate',
-      },
-    });
   }
 
   let isMaintenanceModeEnabled = true; // fail-closed while probing runtime status
@@ -49,22 +36,21 @@ export default async function middleware(request) {
   }
 
   if (isMaintenanceModeEnabled) {
-    const redirectUrl = new URL('/maintenance.html', request.url);
-    return new Response(null, {
-      status: 307,
-      headers: {
-        Location: redirectUrl.toString(),
-        'Cache-Control': 'no-store, no-cache, must-revalidate',
-      },
-    });
+    return redirectToMaintenance(request.url);
   }
 
   return;
 }
 
-function isTruthy(value) {
-  if (typeof value !== 'string') return false;
-  return ['1', 'true', 'yes', 'on'].includes(value.trim().toLowerCase());
+function redirectToMaintenance(requestUrl) {
+  const redirectUrl = new URL('/maintenance.html', requestUrl);
+  return new Response(null, {
+    status: 307,
+    headers: {
+      Location: redirectUrl.toString(),
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
+    },
+  });
 }
 
 export const config = {
