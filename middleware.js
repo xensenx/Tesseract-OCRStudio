@@ -4,22 +4,29 @@
  */
 
 export default function middleware(request) {
+  const isMaintenanceModeEnabled = isTruthy(process.env.MAINTENANCE_MODE);
+
   // If maintenance mode is enabled, intercept all traffic
-  if (process.env.MAINTENANCE_MODE === 'true') {
+  if (isMaintenanceModeEnabled) {
     const url = new URL(request.url);
     
     // Allow the maintenance page itself to be served, as well as assets needed for it
     if (url.pathname === '/maintenance.html' || url.pathname === '/wrench.svg' || url.pathname.startsWith('/_vercel')) {
       return; // Proceed normally
     }
-    
-    // Redirect everything else to the maintenance page
-    url.pathname = '/maintenance.html';
-    return Response.redirect(url, 302);
+
+    // Serve the maintenance page while keeping the requested URL.
+    const redirectUrl = new URL('/maintenance.html', request.url);
+    return Response.redirect(redirectUrl, 307);
   }
 
   // If maintenance mode is off, proceed normally
   return;
+}
+
+function isTruthy(value) {
+  if (typeof value !== 'string') return false;
+  return ['1', 'true', 'yes', 'on'].includes(value.trim().toLowerCase());
 }
 
 export const config = {
