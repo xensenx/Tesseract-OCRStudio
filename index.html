@@ -5,6 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="google-site-verification" content="l0sDwvwiqhjSxoOF45hU4KB-0nIMvn6XrkjF1U4tklc" />
   <title>Tesseract OCR Studio</title>
+  <!-- Maintenance gate: hide body until check resolves, redirect if maintenance on -->
+  <style id="maintenanceBlocker">body { visibility: hidden !important; }</style>
+  <script>
+    (async function() {
+      try {
+        const res = await fetch('/api/config');
+        const data = await res.json();
+        if (data.maintenanceMode === true) {
+          window.location.replace('/maintenance.html');
+          return; // keep body hidden while redirect happens
+        }
+      } catch (e) {
+        // If the check fails, show the page anyway — don't block on network error
+      }
+      // Maintenance is off — reveal the page
+      var s = document.getElementById('maintenanceBlocker');
+      if (s) s.remove();
+    })();
+  </script>
   <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
