@@ -35,6 +35,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
    STATE
 ══════════════════════════════════════════════════════════════ */
 
+const ACCEPTED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/tiff'];
+
 const state = {
   // Slides
   currentSlide: 0,
@@ -43,6 +45,8 @@ const state = {
   // Document
   pdfFile: null,
   pdfDoc:  null,
+  imageFile: null,   // single image file (non-PDF)
+  fileMode: 'pdf',   // 'pdf' | 'image'
 
   // API keys loaded from /api/config
   keyOne: null,
@@ -127,6 +131,9 @@ const resetBtn       = $('resetBtn');
 // Error
 const errorLog       = $('errorLog');
 const errorLogMsg    = $('errorLogMsg');
+
+// Aurora glow
+const auroraGlow     = $('auroraGlow');
 
 // Shared canvas
 const renderCanvas   = $('renderCanvas');
@@ -275,35 +282,65 @@ fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(
 removeFile.addEventListener('click', clearFile);
 
 async function handleFile(file) {
-  if (file.type !== 'application/pdf') { alert('Please upload a PDF file.'); return; }
+  const isPdf = file.type === 'application/pdf';
+  const isImage = ACCEPTED_IMAGE_TYPES.includes(file.type);
 
-  state.pdfFile = file;
-  const arrayBuffer = await file.arrayBuffer();
+  if (!isPdf && !isImage) {
+    alert('Please upload a PDF or an image file (PNG, JPG, WEBP, GIF, TIFF).');
+    return;
+  }
 
-  try {
-    state.pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    const total  = Math.min(state.pdfDoc.numPages, MAX_PAGES);
+  if (isPdf) {
+    state.fileMode = 'pdf';
+    state.imageFile = null;
+    state.pdfFile = file;
+    const arrayBuffer = await file.arrayBuffer();
+
+    try {
+      state.pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const total  = Math.min(state.pdfDoc.numPages, MAX_PAGES);
+
+      fileName.textContent = file.name;
+      fileMeta.textContent = `${(file.size / 1024).toFixed(0)} KB · ${total} page${total !== 1 ? 's' : ''} (max ${MAX_PAGES})`;
+      $('fileInfoIcon').textContent = '📄';
+
+      fileInfo.classList.remove('hidden');
+      dropZone.classList.add('hidden');
+
+      showBatchPlan(total);
+      checkProcessReady();
+
+    } catch (err) {
+      console.error('PDF load error:', err);
+      alert('Could not load PDF. Please try another file.');
+      clearFile();
+    }
+
+  } else {
+    // Image file
+    state.fileMode = 'image';
+    state.pdfFile = null;
+    state.pdfDoc  = null;
+    state.imageFile = file;
 
     fileName.textContent = file.name;
-    fileMeta.textContent = `${(file.size / 1024).toFixed(0)} KB · ${total} page${total !== 1 ? 's' : ''} (max ${MAX_PAGES})`;
+    fileMeta.textContent = `${(file.size / 1024).toFixed(0)} KB · Single image`;
+    $('fileInfoIcon').textContent = '🖼️';
 
     fileInfo.classList.remove('hidden');
     dropZone.classList.add('hidden');
 
-    // Show batch split plan
-    showBatchPlan(total);
+    // Single image = 1 page, only key 1 needed
+    showBatchPlan(1);
     checkProcessReady();
-
-  } catch (err) {
-    console.error('PDF load error:', err);
-    alert('Could not load PDF. Please try another file.');
-    clearFile();
   }
 }
 
 function clearFile() {
-  state.pdfFile = null;
-  state.pdfDoc  = null;
+  state.pdfFile  = null;
+  state.pdfDoc   = null;
+  state.imageFile = null;
+  state.fileMode  = 'pdf';
   fileInput.value = '';
   fileInfo.classList.add('hidden');
   dropZone.classList.remove('hidden');
@@ -332,7 +369,8 @@ function showBatchPlan(total) {
 }
 
 function checkProcessReady() {
-  processBtn.disabled = !(state.pdfDoc && state.keyOne && state.keyTwo);
+  const hasFile = state.fileMode === 'image' ? !!state.imageFile : !!state.pdfDoc;
+  processBtn.disabled = !(hasFile && state.keyOne && state.keyTwo);
 }
 
 
@@ -343,7 +381,9 @@ function checkProcessReady() {
 processBtn.addEventListener('click', startProcessing);
 
 async function startProcessing() {
-  if (!state.pdfDoc || !state.keyOne || !state.keyTwo) return;
+  if (!state.keyOne || !state.keyTwo) return;
+  if (state.fileMode === 'pdf' && !state.pdfDoc) return;
+  if (state.fileMode === 'image' && !state.imageFile) return;
 
   // Reset
   state.extractedPages = [];
@@ -356,6 +396,36 @@ async function startProcessing() {
   errorLog.classList.add('hidden');
   errorLogMsg.textContent = '';
 
+  // IMAGE MODE — single image, single API call
+  if (state.fileMode === 'image') {
+    state.totalPages = 1;
+    buildPageTiles(1);
+    updateProgress(0, 1);
+    startFakeProgress(1);
+    setPhase('Processing image', 'Reading image file…');
+
+    try {
+      const base64 = await imageFileToBase64(state.imageFile);
+      const mimeType = state.imageFile.type;
+
+      setPhase('Extracting text with AI', 'Sending image to AI…');
+      const text = await extractTextFromImage(base64, state.keyOne, 1, 1, mimeType);
+      state.extractedPages = [{ pageNum: 1, text }];
+      state.mergedText = text.trim();
+      showResults(1);
+
+    } catch (err) {
+      console.error('Image processing error:', err);
+      stopFakeProgress(true);
+      setPhase('Error', err.message);
+      showError(`Fatal: ${err.message}`);
+      processBtn.disabled = false;
+      processBtnText.textContent = 'Process Document';
+    }
+    return;
+  }
+
+  // PDF MODE
   const totalPages = Math.min(state.pdfDoc.numPages, MAX_PAGES);
   state.totalPages = totalPages;
 
@@ -366,24 +436,19 @@ async function startProcessing() {
 
   try {
     // ── STEP 1: Render ALL pages to base64 serially ──────────────
-    // Canvas is a single shared DOM element; rendering must be serial.
     setPhase('Rendering pages', 'Converting all pages to images…');
-    const pageImages = []; // index 0 = page 1
+    const pageImages = [];
 
     for (let p = 1; p <= totalPages; p++) {
       setProcSub(`Rendering page ${p} of ${totalPages}…`);
       setTileState(p, 'rendering');
       pageImages.push(await renderPageToBase64(p));
-      // Brief yield to keep UI responsive
       await delay(20);
     }
 
     // ── STEP 2: Split pages into two batches ─────────────────────
-    // Key 1: pages 1 … ceil(n/2)   (gets extra page if odd)
-    // Key 2: pages ceil(n/2)+1 … n
-    const splitIdx = Math.ceil(totalPages / 2); // last index (1-based) for key 1
+    const splitIdx = Math.ceil(totalPages / 2);
 
-    // batch = array of { pageNum, base64 }
     const batch1 = pageImages
       .slice(0, splitIdx)
       .map((img, i) => ({ pageNum: i + 1, base64: img }));
@@ -396,13 +461,11 @@ async function startProcessing() {
     setPhase('Extracting text with AI', `${batch1.length} pages → Key 1 · ${batch2.length} pages → Key 2`);
 
     // ── STEP 4: Fire both batches in parallel ─────────────────────
-    // Within each batch, all pages also fire simultaneously.
     const [results1, results2] = await Promise.all([
       processBatch(batch1, state.keyOne, 1),
       processBatch(batch2, state.keyTwo, 2),
     ]);
 
-    // Merge results from both batches (already sorted internally)
     state.extractedPages = [...results1, ...results2]
       .sort((a, b) => a.pageNum - b.pageNum);
 
@@ -415,7 +478,7 @@ async function startProcessing() {
 
   } catch (err) {
     console.error('Processing error:', err);
-    stopFakeProgress(true);  // stop on error too
+    stopFakeProgress(true);
     setPhase('Error', err.message);
     showError(`Fatal: ${err.message}`);
     processBtn.disabled = false;
@@ -484,15 +547,30 @@ async function renderPageToBase64(pageNum) {
 }
 
 /**
+ * Convert an image File object to a raw base64 string (no data: prefix).
+ */
+function imageFileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result;
+      resolve(dataUrl.split(',')[1]);
+    };
+    reader.onerror = () => reject(new Error('Failed to read image file'));
+    reader.readAsDataURL(file);
+  });
+}
+
+/**
  * Send one page image to Gemma 3 27B IT and return the transcribed text.
- * Structured identically to the working Python reference implementation.
  *
- * @param {string} base64Image  raw base64 PNG (no data: prefix)
+ * @param {string} base64Image  raw base64 image (no data: prefix)
  * @param {string} apiKey
  * @param {number} pageNum      for logging
  * @param {number} batchNum     for logging
+ * @param {string} [mimeType]   defaults to 'image/jpeg'
  */
-async function extractTextFromImage(base64Image, apiKey, pageNum, batchNum) {
+async function extractTextFromImage(base64Image, apiKey, pageNum, batchNum, mimeType = 'image/jpeg') {
   const prompt = `You are a document transcription system.
 Transcribe the text in this document image exactly.
 Rules:
@@ -512,7 +590,7 @@ Rules:
         { text: prompt },
         {
           inline_data: {
-            mime_type: 'image/jpeg',
+            mime_type: mimeType,
             data: base64Image,
           },
         },
@@ -690,6 +768,8 @@ function resetUI() {
   state.mergedText     = '';
   state.pdfDoc         = null;
   state.pdfFile        = null;
+  state.imageFile      = null;
+  state.fileMode       = 'pdf';
   state.doneCount      = 0;
   fileInput.value      = '';
   previewSection.classList.add('hidden');
@@ -716,6 +796,11 @@ function showState(name) {
   if (name === 'idle')       stateIdle.classList.remove('hidden');
   if (name === 'processing') stateProcessing.classList.remove('hidden');
   if (name === 'results')    stateResults.classList.remove('hidden');
+
+  // Toggle aurora glow — only active while AI is processing
+  if (auroraGlow) {
+    auroraGlow.classList.toggle('active', name === 'processing');
+  }
 }
 
 function setPhase(phase, sub) {

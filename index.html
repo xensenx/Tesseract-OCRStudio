@@ -13,7 +13,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="status.js"></script>
 </head>
 <body>
 
@@ -142,7 +141,7 @@
           <div class="pipeline-step">
             <div class="ps-num">01</div>
             <div class="ps-title">Upload</div>
-            <div class="ps-desc">Drop any PDF — up to 15 pages</div>
+            <div class="ps-desc">Drop any PDF (up to 15 pages) or image file</div>
           </div>
           <div class="pipeline-connector"></div>
           <div class="pipeline-step">
@@ -212,6 +211,9 @@
   ══════════════════════════════════════════════ -->
   <div id="toolInterface" class="tool-interface hidden">
 
+    <!-- Aurora glow — visible during processing -->
+    <div class="aurora-glow" id="auroraGlow"></div>
+
     <!-- Dashboard video background -->
     <div class="dashboard-video-bg-wrap">
       <video
@@ -263,7 +265,7 @@
         <!-- Upload -->
         <div class="panel-section">
           <div class="section-label">Document</div>
-          <div class="drop-zone" id="dropZone" role="button" tabindex="0" aria-label="Upload PDF">
+          <div class="drop-zone" id="dropZone" role="button" tabindex="0" aria-label="Upload file">
             <div class="drop-zone-inner">
               <svg class="drop-icon" viewBox="0 0 48 48" fill="none">
                 <rect x="8" y="6" width="32" height="36" rx="3" stroke="currentColor" stroke-width="1.5"/>
@@ -274,14 +276,14 @@
                 <line x1="34" y1="30" x2="34" y2="38" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"/>
                 <line x1="30" y1="34" x2="38" y2="34" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"/>
               </svg>
-              <p class="drop-primary">Drop PDF here</p>
+              <p class="drop-primary">Drop file here</p>
               <p class="drop-secondary">or <span class="drop-link">browse files</span></p>
-              <p class="drop-limit">Max 15 pages · PDF only</p>
+              <p class="drop-limit">PDF (max 15 pages) · PNG · JPG · WEBP</p>
             </div>
-            <input type="file" id="fileInput" accept=".pdf" hidden />
+            <input type="file" id="fileInput" accept=".pdf,image/png,image/jpeg,image/webp,image/gif,image/tiff" hidden />
           </div>
           <div class="file-info hidden" id="fileInfo">
-            <div class="file-info-icon">📄</div>
+            <div class="file-info-icon" id="fileInfoIcon">📄</div>
             <div class="file-info-text">
               <div class="file-name" id="fileName">—</div>
               <div class="file-meta" id="fileMeta">—</div>
@@ -337,7 +339,7 @@
             </div>
           </div>
           <h3 class="idle-title">Ready to Extract</h3>
-          <p class="idle-desc">Upload a PDF to begin. API keys are loaded securely from the server.</p>
+          <p class="idle-desc">Upload a PDF or image to begin. API keys are loaded securely from the server.</p>
         </div>
 
         <!-- PROCESSING -->
