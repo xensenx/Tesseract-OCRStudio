@@ -21,7 +21,12 @@ export default function handler(req, res) {
 
   const keyOne = process.env.GEMMA_API_KEY_ONE || '';
   const keyTwo = process.env.GEMMA_API_KEY_TWO || '';
-  const maintenanceMode = process.env.MAINTENANCE_MODE === 'true';
+  const maintenanceMode = isTruthy(process.env.MAINTENANCE_MODE);
+
+  // During maintenance mode, avoid failing this endpoint when keys are unavailable.
+  if (maintenanceMode) {
+    return res.status(200).json({ maintenanceMode: true, keyOne: '', keyTwo: '' });
+  }
 
   if (!keyOne || !keyTwo) {
     return res.status(500).json({
@@ -32,4 +37,9 @@ export default function handler(req, res) {
   // Return keys — this endpoint is only reachable server-side on Vercel,
   // never exposed in static source files.
   res.status(200).json({ keyOne, keyTwo, maintenanceMode });
+}
+
+function isTruthy(value) {
+  if (typeof value !== 'string') return false;
+  return ['1', 'true', 'yes', 'on'].includes(value.trim().toLowerCase());
 }

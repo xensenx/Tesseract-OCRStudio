@@ -223,7 +223,12 @@ async function loadApiKeys() {
       throw new Error(body.error || `Server returned ${res.status}`);
     }
 
-    const { keyOne, keyTwo } = await res.json();
+    const { keyOne, keyTwo, maintenanceMode } = await res.json();
+
+    if (maintenanceMode === true) {
+      window.location.replace('/maintenance.html');
+      return;
+    }
 
     if (!keyOne || !keyTwo) {
       throw new Error('One or both API keys missing from server response');
