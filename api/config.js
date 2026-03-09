@@ -14,6 +14,10 @@
  */
 
 export default function handler(req, res) {
+  // Never cache this response — it contains live env var state
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+
   // Only allow GET
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
