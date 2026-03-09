@@ -211,9 +211,6 @@
   ══════════════════════════════════════════════ -->
   <div id="toolInterface" class="tool-interface hidden">
 
-    <!-- Aurora glow — visible during processing -->
-    <div class="aurora-glow" id="auroraGlow"></div>
-
     <!-- Dashboard video background -->
     <div class="dashboard-video-bg-wrap">
       <video
@@ -451,6 +448,9 @@
     <canvas id="renderCanvas" style="display:none"></canvas>
 
   </div><!-- /toolInterface -->
+
+  <!-- Aurora glow — body-level so it isn't clipped by tool-interface overflow:hidden -->
+  <div class="aurora-glow" id="auroraGlow"></div>
 
   <script src="script.js"></script>
 </body>

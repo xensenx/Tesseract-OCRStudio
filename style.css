@@ -1091,17 +1091,17 @@ body {
 .aurora-glow {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: 9999;
   pointer-events: none;
   opacity: 0;
   transition: opacity 1.2s ease;
-  /* Four corner blurs that animate independently */
   background:
-    radial-gradient(ellipse 60% 35% at 0% 0%,   rgba(80, 140, 255, 0.18) 0%, transparent 70%),
-    radial-gradient(ellipse 55% 30% at 100% 0%,  rgba(120, 80, 255, 0.15) 0%, transparent 70%),
-    radial-gradient(ellipse 60% 35% at 100% 100%,rgba(60, 180, 255, 0.14) 0%, transparent 70%),
-    radial-gradient(ellipse 55% 30% at 0% 100%,  rgba(100, 100, 255, 0.16) 0%, transparent 70%);
+    radial-gradient(ellipse 45% 30% at 0% 0%,    rgba(80, 140, 255, 0.22) 0%, transparent 65%),
+    radial-gradient(ellipse 45% 30% at 100% 0%,   rgba(120, 80, 255, 0.18) 0%, transparent 65%),
+    radial-gradient(ellipse 45% 30% at 100% 100%,  rgba(60, 180, 255, 0.18) 0%, transparent 65%),
+    radial-gradient(ellipse 45% 30% at 0% 100%,    rgba(100, 100, 255, 0.20) 0%, transparent 65%);
   animation: auroraPulse 4s ease-in-out infinite;
+  /* Only visible when .active is added by JS */
 }
 
 .aurora-glow.active {
@@ -1109,26 +1109,26 @@ body {
 }
 
 @keyframes auroraPulse {
-  0%,100% {
+  0%, 100% {
     background:
-      radial-gradient(ellipse 60% 35% at 0% 0%,   rgba(80, 140, 255, 0.18) 0%, transparent 70%),
-      radial-gradient(ellipse 55% 30% at 100% 0%,  rgba(120, 80, 255, 0.15) 0%, transparent 70%),
-      radial-gradient(ellipse 60% 35% at 100% 100%,rgba(60, 180, 255, 0.14) 0%, transparent 70%),
-      radial-gradient(ellipse 55% 30% at 0% 100%,  rgba(100, 100, 255, 0.16) 0%, transparent 70%);
+      radial-gradient(ellipse 45% 30% at 0% 0%,    rgba(80,  140, 255, 0.22) 0%, transparent 65%),
+      radial-gradient(ellipse 45% 30% at 100% 0%,   rgba(120, 80,  255, 0.18) 0%, transparent 65%),
+      radial-gradient(ellipse 45% 30% at 100% 100%,  rgba(60,  180, 255, 0.18) 0%, transparent 65%),
+      radial-gradient(ellipse 45% 30% at 0% 100%,    rgba(100, 100, 255, 0.20) 0%, transparent 65%);
   }
   33% {
     background:
-      radial-gradient(ellipse 70% 40% at 0% 0%,   rgba(100, 160, 255, 0.22) 0%, transparent 70%),
-      radial-gradient(ellipse 50% 28% at 100% 0%,  rgba(140, 60, 255, 0.12) 0%, transparent 70%),
-      radial-gradient(ellipse 55% 32% at 100% 100%,rgba(80, 200, 255, 0.18) 0%, transparent 70%),
-      radial-gradient(ellipse 65% 35% at 0% 100%,  rgba(80,  80, 255, 0.20) 0%, transparent 70%);
+      radial-gradient(ellipse 55% 38% at 0% 0%,    rgba(100, 160, 255, 0.28) 0%, transparent 65%),
+      radial-gradient(ellipse 40% 25% at 100% 0%,   rgba(140, 60,  255, 0.15) 0%, transparent 65%),
+      radial-gradient(ellipse 50% 34% at 100% 100%,  rgba(80,  200, 255, 0.22) 0%, transparent 65%),
+      radial-gradient(ellipse 55% 36% at 0% 100%,    rgba(80,  80,  255, 0.25) 0%, transparent 65%);
   }
   66% {
     background:
-      radial-gradient(ellipse 50% 28% at 0% 0%,   rgba(60, 120, 255, 0.14) 0%, transparent 70%),
-      radial-gradient(ellipse 70% 40% at 100% 0%,  rgba(150, 100, 255, 0.20) 0%, transparent 70%),
-      radial-gradient(ellipse 65% 38% at 100% 100%,rgba(40, 160, 255, 0.18) 0%, transparent 70%),
-      radial-gradient(ellipse 50% 28% at 0% 100%,  rgba(120, 120, 255, 0.12) 0%, transparent 70%);
+      radial-gradient(ellipse 40% 25% at 0% 0%,    rgba(60,  120, 255, 0.16) 0%, transparent 65%),
+      radial-gradient(ellipse 55% 38% at 100% 0%,   rgba(150, 100, 255, 0.25) 0%, transparent 65%),
+      radial-gradient(ellipse 55% 38% at 100% 100%,  rgba(40,  160, 255, 0.22) 0%, transparent 65%),
+      radial-gradient(ellipse 40% 25% at 0% 100%,    rgba(120, 120, 255, 0.15) 0%, transparent 65%);
   }
 }
 
