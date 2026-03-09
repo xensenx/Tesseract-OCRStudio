@@ -5,6 +5,7 @@
 
 export default async function middleware(request) {
   const url = new URL(request.url);
+  const envMaintenanceFallback = isTruthy(process.env.MAINTENANCE_MODE);
 
   // Always allow maintenance assets and maintenance status endpoint itself.
   if (
@@ -16,7 +17,19 @@ export default async function middleware(request) {
     return;
   }
 
-  let isMaintenanceModeEnabled = true; // fail-closed: default to lock site
+  // Immediate lock if env is available in this runtime and enabled.
+  if (envMaintenanceFallback) {
+    const redirectUrl = new URL('/maintenance.html', request.url);
+    return new Response(null, {
+      status: 307,
+      headers: {
+        Location: redirectUrl.toString(),
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+      },
+    });
+  }
+
+  let isMaintenanceModeEnabled = true; // fail-closed while probing runtime status
 
   try {
     const statusUrl = new URL('/api/maintenance', request.url);
@@ -31,6 +44,7 @@ export default async function middleware(request) {
       isMaintenanceModeEnabled = data?.maintenanceMode === true;
     }
   } catch {
+    // Fail-closed when status endpoint is unavailable.
     isMaintenanceModeEnabled = true;
   }
 
@@ -46,6 +60,11 @@ export default async function middleware(request) {
   }
 
   return;
+}
+
+function isTruthy(value) {
+  if (typeof value !== 'string') return false;
+  return ['1', 'true', 'yes', 'on'].includes(value.trim().toLowerCase());
 }
 
 export const config = {
